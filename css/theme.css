@@ -50,6 +50,9 @@
   color: var(--muted);
 }
 [data-theme="dark"] :is(.profile-identity-label, .profile-setting .setting-copy small) { color: var(--muted); }
+[data-theme="dark"] .project-filters { background: var(--soft); }
+[data-theme="dark"] :is(.project-filter span, .project-contact span, .project-billing span, .project-view) { color: var(--muted); }
+[data-theme="dark"] .project-filter.active span { color: #fff; }
 [data-theme="dark"] input::placeholder,
 [data-theme="dark"] textarea::placeholder { color: #9aacc3; opacity: 1; }
 [data-theme="dark"] :is(.round-icon, .avatar, .chip, .tag, .badge, .status,
