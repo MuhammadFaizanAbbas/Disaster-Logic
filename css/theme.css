@@ -28,7 +28,7 @@
 }
 
 [data-theme="dark"] :is(.panel, .topbar, .secondary, .small-btn, .page-num,
-  .search-strip, .search-strip input, .search-strip .strip-action, .map-controls) {
+  .search-strip, .search-strip input, .search-strip .strip-action, .map-controls, .profile-setting) {
   background: var(--panel);
   border-color: var(--line);
   color: var(--ink);
@@ -49,6 +49,7 @@
   .setting-copy div, .service-card p, .table-footer, .empty-view, .global-search) {
   color: var(--muted);
 }
+[data-theme="dark"] :is(.profile-identity-label, .profile-setting .setting-copy small) { color: var(--muted); }
 [data-theme="dark"] input::placeholder,
 [data-theme="dark"] textarea::placeholder { color: #9aacc3; opacity: 1; }
 [data-theme="dark"] :is(.round-icon, .avatar, .chip, .tag, .badge, .status,

@@ -24,7 +24,12 @@
 
     <section class="access-card" aria-labelledby="access-title">
       <p class="access-kicker">Account access</p>
-      <h2 id="access-title">Choose an account action</h2>
+      <h2 id="access-title">Welcome back</h2>
+
+      <div class="access-tabs" role="tablist" aria-label="Account action">
+        <button class="active" data-mode="signin" type="button" role="tab" aria-selected="true">Sign in</button>
+        <button data-mode="signup" type="button" role="tab" aria-selected="false">Create account</button>
+      </div>
 
       <button class="access-google" id="google-auth" type="button">
         <svg class="google-mark" viewBox="0 0 24 24" aria-hidden="true">
@@ -36,21 +41,9 @@
         <span>Continue with Google</span>
       </button>
 
-      <div class="access-divider"><span>or choose</span></div>
+      <div class="access-divider"><span>or continue with email</span></div>
 
-      <div class="access-choices" id="access-choices">
-        <button class="access-choice" data-mode="signin" type="button">
-          <span><strong>Sign in</strong><small>Use an existing account.</small></span>
-          <b aria-hidden="true">›</b>
-        </button>
-        <button class="access-choice" data-mode="signup" type="button">
-          <span><strong>Create account</strong><small>Start with your email and a password.</small></span>
-          <b aria-hidden="true">›</b>
-        </button>
-      </div>
-
-      <form id="access-form" class="access-form" hidden>
-        <button id="access-back" class="access-back" type="button">← Back</button>
+      <form id="access-form" class="access-form">
 
         <label class="access-field" for="email">
           <span>Email address</span>
@@ -60,16 +53,8 @@
         <label class="access-field" for="password">
           <span>Password</span>
           <span class="access-password">
-            <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" minlength="8" required>
+            <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required>
             <button class="password-toggle" data-password="password" type="button" aria-label="Show password">Show</button>
-          </span>
-        </label>
-
-        <label class="access-field" id="confirm-field" for="confirm-password" hidden>
-          <span>Confirm password</span>
-          <span class="access-password">
-            <input id="confirm-password" name="confirm_password" type="password" autocomplete="new-password" placeholder="Enter your password again" minlength="8">
-            <button class="password-toggle" data-password="confirm-password" type="button" aria-label="Show password confirmation">Show</button>
           </span>
         </label>
 
@@ -79,7 +64,7 @@
       </form>
     </section>
 
-    <p class="access-footnote">Secure authentication powered by Supabase.</p>
+    <p class="access-footnote">By continuing, you agree to securely access Disaster Logic.</p>
   </main>
 
   <div class="loading-overlay" id="auth-loading" hidden aria-live="polite">
