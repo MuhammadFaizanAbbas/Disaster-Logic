@@ -17,6 +17,8 @@
   const loading = query('#auth-loading');
   const loadingText = query('#loading-text');
   const params = new URLSearchParams(location.search);
+  const accountDeleted = params.get('deleted') === '1' || sessionStorage.getItem('disaster-account-deleted') === '1';
+  if (accountDeleted) sessionStorage.removeItem('disaster-account-deleted');
   let mode = params.get('mode') === 'signup' ? 'signup' : 'signin';
   let redirecting = false;
   let resolvingAccount = false;
@@ -178,6 +180,7 @@
   });
 
   show(mode);
+  if (accountDeleted) message('Your account and profile data were permanently deleted.');
   (async () => {
     try {
       const { session } = api.unwrap(await api.sb.auth.getSession());
