@@ -1,0 +1,16 @@
+.auth-page{min-height:100vh;display:grid;place-items:center;padding:28px;background:var(--bg,#f4f7fb)}
+.auth-card{width:min(100%,440px);padding:28px}.auth-card h1{font-size:25px}.auth-card p{line-height:1.6}
+.live-message{position:fixed;right:20px;bottom:20px;z-index:200;padding:14px 20px;background:#123a65;color:#fff;border-radius:8px;max-width:min(500px,90vw);box-shadow:0 8px 24px #0003}
+.live-message.error{background:#9d2b30}.live-empty{padding:38px;text-align:center}.live-form{padding:20px}.live-form .field{margin-bottom:14px}.live-form input,.live-form select,.live-form textarea{width:100%}
+.live-form label{display:block;font-weight:600;margin-bottom:6px}.live-form textarea{min-height:110px}.live-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.live-card{padding:20px;margin-bottom:15px}.live-card h2{font-size:18px;margin-top:0}.live-card p{line-height:1.6}.live-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:14px}
+.workspace-switch{max-width:220px;padding:8px;border-radius:6px;border:1px solid #ccd5e2}.field-error{color:#b32b34;line-height:1.5}.live-loading{padding:45px;text-align:center}
+.live-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}.live-tabs button.active{background:#1768e8;color:white}.step-json{min-height:250px!important;font-family:monospace}
+.live-records{width:100%}.live-records th,.live-records td{text-align:left;padding:14px;border-bottom:1px solid #d9e2ef}.live-card img{max-width:100%;max-height:320px;border-radius:8px}
+.sidebar-footer button.side-action{border:0;background:none;width:100%;text-align:left;cursor:pointer}.availability-row{display:flex;gap:20px;padding:8px}.availability-row input{width:auto}.availability-row label{font-weight:400}
+.public-shell{max-width:1000px;margin:0 auto;padding:25px}.public-shell .booking-progress-shell{top:0}.live-title{display:flex;justify-content:space-between;align-items:center;gap:12px}
+button:disabled{opacity:.55;cursor:wait}.live-pager{display:flex;justify-content:space-between;padding:15px}.live-pager button{margin-left:8px}.auth-card .field input{width:100%}.mono{font-family:monospace;overflow-wrap:anywhere}
+@media(max-width:700px){.live-grid{grid-template-columns:1fr}.workspace-switch{max-width:160px}.live-title{align-items:flex-start;flex-direction:column}.live-card,.live-form{padding:16px}}
+
+.live-form input[type=checkbox],.live-form input[type=radio]{width:auto;margin-right:8px}.live-form label:has(input[type=checkbox]){font-weight:400}
+.public-shell .booking-menu { display: none; }

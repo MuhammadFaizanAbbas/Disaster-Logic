@@ -5,7 +5,7 @@
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
 
-  const serviceTypes = [
+  let serviceTypes = [
     { id: 'fire-smoke', title: 'Fire & Smoke Containment', icon: 'flame', tone: 'fire', description: 'Soot mitigation, smoke removal, and structural safety stabilization.', tag: 'Priority triage', detail: 'Immediate' },
     { id: 'water-damage', title: 'Water Damage / Pipe Burst', icon: 'droplet', tone: 'water', description: 'Emergency extraction, leak isolation, and structural drying.', tag: 'Water removal', detail: '24/7 response' },
     { id: 'roof-structure', title: 'Structural / Roof Tarping', icon: 'roof', tone: 'structure', description: 'Board-up, roof tarping, structural shoring, and storm damage.', tag: 'Stabilization', detail: 'Site safety' },
@@ -173,7 +173,7 @@
   function syncForm(announce = true) {
     if (!form) return;
     form.querySelector('.booking-schedule').disabled = draft.priority !== 'scheduled';
-    form.elements.namedItem('zip').required = !draft.coordinates;
+    form.elements.namedItem('zip').required = true;
     const zipValid = form.elements.namedItem('zip').validity.valid;
     const errors = detailErrors();
     const detailsValid = !Object.values(errors).some(Boolean);
@@ -267,7 +267,7 @@
       if (form !== activeForm) return;
       draft.coordinates = { latitude: position.coords.latitude, longitude: position.coords.longitude };
       button.disabled = false;
-      showLocation(`Location captured: ${draft.coordinates.latitude.toFixed(4)}, ${draft.coordinates.longitude.toFixed(4)}. ZIP code is optional.`);
+      showLocation(`Location captured: ${draft.coordinates.latitude.toFixed(4)}, ${draft.coordinates.longitude.toFixed(4)}. Enter a ZIP code to match service coverage.`);
       syncForm();
     }, () => {
       if (form !== activeForm) return;
@@ -325,9 +325,9 @@
       // Integrate the API by registering an async handler that rejects failed requests.
       await submitHandler({ request, files: [...files] });
       result.textContent = 'Request received. We will contact you to confirm service availability.';
-    } catch {
+    } catch (error) {
       result.classList.add('is-error');
-      result.textContent = 'Your request could not be sent. Your details are still here; please try again.';
+      result.textContent = error.message || 'Your request could not be sent. Your details are still here; please try again.';
     } finally {
       submitting = false;
       button.disabled = false;
@@ -386,7 +386,7 @@
       if (!button || button.disabled) return;
       goToStep(Number(button.dataset.bookingGo));
     }, options);
-    if (draft.coordinates) showLocation(`Location captured: ${draft.coordinates.latitude.toFixed(4)}, ${draft.coordinates.longitude.toFixed(4)}. ZIP code is optional.`);
+    if (draft.coordinates) showLocation(`Location captured: ${draft.coordinates.latitude.toFixed(4)}, ${draft.coordinates.longitude.toFixed(4)}. Enter a ZIP code to match service coverage.`);
     else if (draft.zip) showLocation(`Service ZIP: ${draft.zip}. Availability will be confirmed with your request.`);
     progressValue = -1;
     syncForm(false); renderFiles(); setupStickyProgress();
@@ -407,6 +407,11 @@
   window.BookingView = Object.freeze({
     render, mount, unmount,
     getPayload: payload,
+    setServices(services) {
+      const tones = ['fire', 'water', 'structure', 'sewage', 'environment', 'storm'];
+      serviceTypes = services.map((s, i) => ({ id: s.code, title: s.name, description: s.description || '', tag: s.tag || '', detail: s.response_label || '', tone: tones[i % 6], icon: 'shield' }));
+      if (!serviceTypes.some(s => s.id === draft.service)) draft.service = '';
+    },
     setSubmitHandler(handler) {
       if (handler !== null && typeof handler !== 'function') throw new TypeError('Expected an async booking submission function.');
       submitHandler = handler;

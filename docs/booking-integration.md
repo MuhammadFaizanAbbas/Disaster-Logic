@@ -1,57 +1,24 @@
-# Service booking frontend
+# Booking integration
 
-Open `index.html` directly and select **New Service Request**, or use `index.html#new-service`.
+The booking form in `js/booking.js` is connected by `js/live-app.js` to `js/api.js`. Submit creates an Opportunity in the selected workspace through the authorization-checked `submit_booking` RPC. Successful requests show a real receipt; failures preserve entered values and show the API error.
 
-The form and its behavior live in `js/booking.js`; its styles live in `css/booking.css`.
-The dark-mode preference is managed by `js/theme.js` and saved under `disaster-logic-theme`.
-Customer details and attachments stay in memory during navigation; they are not saved in browser storage.
+- Public form: `index.html?booking=WORKSPACE_PUBLIC_KEY`.
+- Internal form: sign in, select a workspace, and choose New Service Request.
+- Enabled services come from the workspace configuration.
+- ZIP/postal code is required for matching. Geolocation captures coordinates but does not reverse-geocode a ZIP.
+- Public submissions are public Opportunities. Internal members may also choose private visibility.
+- Attachments upload into a private bucket with an expiring capability; allowed formats are JPEG, PNG, WebP, MP4, WebM and MOV, up to five files, 10 MB each.
 
-All four sections and the final request button are visible immediately. Users can fill them in any
-order; changing an answer never hides another section or automatically scrolls the page.
+The adapter maps customer, service, damage notes, dispatch priority/date/window, arrival notice, coordinates and visibility to `submit_booking`. It then uploads the files and registers their metadata through `attach_media`. Download URLs expire after five minutes and require authorized access.
 
-The booking page fills the workspace beside the sidebar, without the dashboard toolbar.
-On mobile, the navigation toggle is part of the progress strip.
-The progress bar sticks to the top of the viewport and becomes compact on scroll.
-Its fill advances smoothly as valid details are entered, with two overlapping water waves and animated
-completion markers. Each section contributes 25%; valid contact fields fill their section gradually.
-The default schedule counts once the preceding sections are complete, or after a dispatch control is
-changed. A valid, fully completed form reaches 100%; this does not mean it has been submitted.
-Waves settle at completion. Reduced-motion users see a static fill and instant progress updates.
-Every step label is always available for jumping to that section.
+A receipt stays in page memory during retries to prevent another Opportunity when an upload fails. Reloading clears that receipt. The map is a local illustration, not a live ZIP coverage map. Host over HTTP for local development and HTTPS in production.
 
-Contact details are checked on input, change, and focus loss. Inline messages explain invalid fields.
-The final **Confirm & Request** button reads current values (including autofill) and validates the
-whole form before preparing or submitting a request. Notes and attachments remain optional.
-The **Opportunity type** field at the end requires an explicit **Public** or **Private** selection,
-which is retained in the draft and included in the final section's completion check.
-
-## Submission hook
-
-Register your API integration after `js/booking.js` has loaded:
+The reusable integration hook remains:
 
 ```js
 window.BookingView.setSubmitHandler(async ({ request, files }) => {
-  // Send request to your booking API and upload files using your integration.
-  // Resolve only after the request has been accepted; throw on any failure.
+  return window.DisasterAPI.submitBooking(workspacePublicKey, { request, files });
 });
 ```
 
-`request` contains:
-
-- `location`: `postal_code` and optional `coordinates` (latitude/longitude).
-- `service_type`: the selected service ID.
-- `opportunity_type`: `public` or `private` (required).
-- `customer`: `full_name`, `phone`, and `email`.
-- `damage_notes`.
-- `dispatch`: `priority`, `preferred_date`, `time_window`, `arrival_notice`, and `time_zone`.
-
-`files` is an array of browser `File` objects. No files are uploaded by this frontend alone.
-Use `window.BookingView.getPayload()` to inspect the current request structure.
-
-Until a submission handler is registered, a valid form shows that the request has **not** been submitted.
-It also emits a bubbling `booking:prepared` event with `{ request, files }` as its detail.
-The form retains entered details when an API handler fails.
-
-The map is a local illustrated preview, not a live coverage or ZIP lookup.
-The **Use location** button captures coordinates with the visitor's browser permission.
-Connect your mapping/coverage lookup when integrating the backend.
+`request` contains `location`, `service_type`, `opportunity_type`, `customer`, `damage_notes`, and `dispatch`; `files` contains browser File objects. The live application already registers this handler for you.
