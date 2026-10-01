@@ -1,76 +1,99 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#1d3046">
-  <title>Sign in | Disaster Logic</title>
-  <script src="js/theme.js"></script>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#19293d">
+  <title>Account access | Disaster Logic</title>
   <link rel="preload" href="assets/fonts/source-sans-3/source-sans-3-variable.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/typography.css">
   <link rel="stylesheet" href="css/theme.css">
   <link rel="stylesheet" href="css/live.css">
 </head>
-<body class="login-body">
-  <main class="login-shell">
-    <section class="login-intro" aria-label="Disaster Logic">
-      <div class="login-brand">
-        <span class="login-brand-mark" aria-hidden="true">DL</span>
-        <span>
-          <strong>Disaster Logic</strong>
-          <small>Restoration operations</small>
-        </span>
+<body class="access-body">
+  <main class="access-shell">
+    <header class="access-intro">
+      <a class="access-brand" href="login.html" aria-label="Disaster Logic home">
+        <span class="access-brand-mark" aria-hidden="true">D</span>
+        <span>Disaster Logic</span>
+      </a>
+      <h1 id="page-heading">Sign in to continue.</h1>
+      <p id="page-description">Access your workspace, review recent activity, and pick up where you left off.</p>
+    </header>
+
+    <section class="access-card" aria-labelledby="access-title">
+      <p class="access-kicker">Account access</p>
+      <h2 id="access-title">Choose an account action</h2>
+
+      <button class="access-google" id="google-auth" type="button">
+        <svg class="google-mark" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="#4285f4" d="M21.6 12.2c0-.7-.1-1.4-.2-2H12v3.9h5.4a4.6 4.6 0 0 1-2 3v2.5h3.3c1.9-1.8 2.9-4.4 2.9-7.4Z"/>
+          <path fill="#34a853" d="M12 22c2.7 0 5-.9 6.7-2.4l-3.3-2.5c-.9.6-2 1-3.4 1a5.9 5.9 0 0 1-5.5-4.1H3.1v2.6A10 10 0 0 0 12 22Z"/>
+          <path fill="#fbbc05" d="M6.5 14a6 6 0 0 1 0-3.9V7.5H3.1a10 10 0 0 0 0 9.1L6.5 14Z"/>
+          <path fill="#ea4335" d="M12 6c1.5 0 2.8.5 3.9 1.5l2.9-2.8A9.8 9.8 0 0 0 3.1 7.5l3.4 2.6A5.9 5.9 0 0 1 12 6Z"/>
+        </svg>
+        <span>Continue with Google</span>
+      </button>
+
+      <div class="access-divider"><span>or choose</span></div>
+
+      <div class="access-choices" id="access-choices">
+        <button class="access-choice" data-mode="signin" type="button">
+          <span><strong>Sign in</strong><small>Use an existing account.</small></span>
+          <b aria-hidden="true">›</b>
+        </button>
+        <button class="access-choice" data-mode="signup" type="button">
+          <span><strong>Create account</strong><small>Start with your email and a password.</small></span>
+          <b aria-hidden="true">›</b>
+        </button>
       </div>
-      <div class="login-intro-copy">
-        <p class="login-eyebrow">One workspace. Every response.</p>
-        <h1>Coordinate restoration work from intake to completion.</h1>
-        <p>Manage service requests, projects, customers, crews, and referrals in one secure workspace.</p>
-      </div>
-      <p class="login-security-note">Secure access powered by Supabase.</p>
+
+      <form id="access-form" class="access-form" hidden>
+        <button id="access-back" class="access-back" type="button">← Back</button>
+
+        <label class="access-field" for="email">
+          <span>Email address</span>
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+        </label>
+
+        <label class="access-field" for="password">
+          <span>Password</span>
+          <span class="access-password">
+            <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" minlength="8" required>
+            <button class="password-toggle" data-password="password" type="button" aria-label="Show password">Show</button>
+          </span>
+        </label>
+
+        <label class="access-field" id="confirm-field" for="confirm-password" hidden>
+          <span>Confirm password</span>
+          <span class="access-password">
+            <input id="confirm-password" name="confirm_password" type="password" autocomplete="new-password" placeholder="Enter your password again" minlength="8">
+            <button class="password-toggle" data-password="confirm-password" type="button" aria-label="Show password confirmation">Show</button>
+          </span>
+        </label>
+
+        <p id="login-feedback" class="login-feedback" role="status" aria-live="polite"></p>
+        <button id="login-submit" class="login-submit primary">Sign in</button>
+        <button id="magic-link" class="access-magic" type="button">Email me a sign-in link</button>
+      </form>
     </section>
 
-    <section class="login-panel" aria-labelledby="login-title">
-      <div class="login-card">
-        <div class="login-heading">
-          <p class="login-eyebrow" id="login-kicker">Welcome back</p>
-          <h2 id="login-title">Sign in to your account</h2>
-          <p id="login-description">Enter your workspace email and password.</p>
-        </div>
-
-        <form id="login-form" class="login-form">
-          <div class="login-field" id="name-field" hidden>
-            <label for="full-name">Full name</label>
-            <input id="full-name" name="full_name" type="text" autocomplete="name" maxlength="120">
-          </div>
-          <div class="login-field">
-            <label for="email">Email address</label>
-            <input id="email" name="email" type="email" autocomplete="username" placeholder="you@company.com" required>
-          </div>
-          <div class="login-field">
-            <div class="login-label-row">
-              <label for="password">Password</label>
-              <button class="login-text-button" id="toggle-password" type="button" aria-controls="password">Show</button>
-            </div>
-            <input id="password" name="password" type="password" autocomplete="current-password" minlength="8" required>
-          </div>
-
-          <p class="login-feedback" id="login-feedback" role="status" aria-live="polite"></p>
-          <button class="primary login-submit" id="login-submit" type="submit">Sign in</button>
-        </form>
-
-        <div class="login-divider" id="login-divider"><span>or</span></div>
-        <button class="secondary login-alt" id="magic-link" type="button">Email me a sign-in link</button>
-        <p class="login-switch"><span id="mode-prompt">New to Disaster Logic?</span> <button class="login-text-button" id="mode-toggle" type="button">Create an account</button></p>
-      </div>
-      <button class="login-theme" type="button" data-action="theme" aria-label="Toggle dark mode">Toggle theme</button>
-    </section>
+    <p class="access-footnote">Secure authentication powered by Supabase.</p>
   </main>
+
+  <div class="loading-overlay" id="auth-loading" hidden aria-live="polite">
+    <span class="loading-spinner" aria-hidden="true"></span>
+    <span id="loading-text">Signing in…</span>
+  </div>
 
   <noscript><p class="login-noscript">JavaScript is required to sign in.</p></noscript>
   <script defer src="js/vendor/supabase.js"></script>
   <script defer src="js/config.js"></script>
   <script defer src="js/api.js"></script>
+  <script defer src="js/onboarding-ui.js"></script>
+  <script defer src="js/onboarding-templates.js"></script>
+  <script defer src="js/onboarding-flow.js"></script>
   <script defer src="js/login.js"></script>
 </body>
 </html>

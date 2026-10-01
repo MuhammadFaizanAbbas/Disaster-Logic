@@ -2,23 +2,24 @@
   'use strict';
 
   const api = window.DisasterAPI;
-  const form = document.querySelector('#login-form');
-  const nameField = document.querySelector('#name-field');
-  const fullName = document.querySelector('#full-name');
-  const email = document.querySelector('#email');
-  const password = document.querySelector('#password');
-  const submit = document.querySelector('#login-submit');
-  const feedback = document.querySelector('#login-feedback');
-  const modeToggle = document.querySelector('#mode-toggle');
-  const modePrompt = document.querySelector('#mode-prompt');
-  const magicLink = document.querySelector('#magic-link');
-  const divider = document.querySelector('#login-divider');
-  const togglePassword = document.querySelector('#toggle-password');
-  const title = document.querySelector('#login-title');
-  const kicker = document.querySelector('#login-kicker');
-  const description = document.querySelector('#login-description');
+  const query = selector => document.querySelector(selector);
+  const form = query('#access-form');
+  const choices = query('#access-choices');
+  const title = query('#access-title');
+  const heading = query('#page-heading');
+  const description = query('#page-description');
+  const email = query('#email');
+  const password = query('#password');
+  const confirmField = query('#confirm-field');
+  const confirmPassword = query('#confirm-password');
+  const submit = query('#login-submit');
+  const magic = query('#magic-link');
+  const google = query('#google-auth');
+  const feedback = query('#login-feedback');
+  const loading = query('#auth-loading');
+  const loadingText = query('#loading-text');
   const params = new URLSearchParams(location.search);
-  let mode = 'login';
+  let mode = null;
   let redirecting = false;
 
   function destination() {
@@ -26,120 +27,172 @@
     const raw = params.get('next');
     if (!raw) return fallback;
     try {
-      const target = new URL(raw, location.href);
-      const appPath = new URL('./', location.href).pathname;
-      if (target.origin !== location.origin || !target.pathname.startsWith(appPath) || target.pathname.endsWith('/login.html')) return fallback;
-      return target;
+      const requested = new URL(raw, location.href);
+      const base = new URL('./', location.href).pathname;
+      const isLocal = requested.origin === location.origin && requested.pathname.startsWith(base);
+      return isLocal && !requested.pathname.endsWith('/login.html') ? requested : fallback;
     } catch {
       return fallback;
     }
   }
 
-  function redirectUrl() {
+  function callbackUrl() {
     const callback = new URL('login.html', location.href);
-    const target = destination();
-    callback.searchParams.set('next', `${target.pathname}${target.search}${target.hash}`);
+    const next = destination();
+    callback.searchParams.set('next', `${next.pathname}${next.search}${next.hash}`);
     return callback.href;
   }
 
-  function enterApp() {
+  function setBusy(active, text) {
+    loading.hidden = !active;
+    if (text) loadingText.textContent = text;
+    [submit, magic, google, ...choices.querySelectorAll('button')].forEach(button => {
+      button.disabled = active;
+    });
+  }
+
+  function message(text = '', error = false) {
+    feedback.textContent = text;
+    feedback.classList.toggle('error', error);
+  }
+
+  function enterApplication() {
     if (redirecting) return;
     redirecting = true;
+    setBusy(true, 'Opening your workspace…');
     location.replace(destination().href);
   }
 
-  function message(text, isError = false) {
-    feedback.textContent = text;
-    feedback.classList.toggle('error', isError);
+  function proceed() {
+    if (params.get('onboard') === '1') window.DisasterOnboarding.start();
+    else enterApplication();
   }
 
-  function setBusy(busy) {
-    submit.disabled = busy;
-    modeToggle.disabled = busy;
-    magicLink.disabled = busy;
-    submit.textContent = busy ? (mode === 'signup' ? 'Creating account…' : 'Signing in…') : (mode === 'signup' ? 'Create account' : 'Sign in');
-  }
-
-  function setMode(nextMode) {
+  function show(nextMode) {
     mode = nextMode;
-    const signingUp = mode === 'signup';
-    nameField.hidden = !signingUp;
-    fullName.required = signingUp;
-    password.autocomplete = signingUp ? 'new-password' : 'current-password';
-    kicker.textContent = signingUp ? 'Get started' : 'Welcome back';
-    title.textContent = signingUp ? 'Create your account' : 'Sign in to your account';
-    description.textContent = signingUp ? 'Create an account, then confirm your email to continue.' : 'Enter your workspace email and password.';
-    submit.textContent = signingUp ? 'Create account' : 'Sign in';
-    modePrompt.textContent = signingUp ? 'Already have an account?' : 'New to Disaster Logic?';
-    modeToggle.textContent = signingUp ? 'Sign in instead' : 'Create an account';
-    magicLink.hidden = signingUp;
-    divider.hidden = signingUp;
-    message('');
-    (signingUp ? fullName : email).focus();
+    const creating = mode === 'signup';
+    choices.hidden = true;
+    form.hidden = false;
+    confirmField.hidden = !creating;
+    confirmPassword.required = creating;
+    password.autocomplete = creating ? 'new-password' : 'current-password';
+    title.textContent = creating ? 'Create account' : 'Welcome back';
+    heading.textContent = creating ? 'Create your account.' : 'Sign in to continue.';
+    description.textContent = creating
+      ? 'Start with your email. You will complete your profile after verification.'
+      : 'Access your dashboard and continue where you left off.';
+    submit.textContent = creating ? 'Create account' : 'Sign in';
+    magic.hidden = creating;
+    message();
+    email.focus();
   }
 
-  document.querySelector('[data-action="theme"]').addEventListener('click', () => window.AdminTheme.toggle());
-  togglePassword.addEventListener('click', () => {
-    const visible = password.type === 'text';
-    password.type = visible ? 'password' : 'text';
-    togglePassword.textContent = visible ? 'Show' : 'Hide';
-    togglePassword.setAttribute('aria-pressed', String(!visible));
-  });
-  modeToggle.addEventListener('click', () => setMode(mode === 'login' ? 'signup' : 'login'));
+  function reset() {
+    mode = null;
+    form.reset();
+    choices.hidden = false;
+    form.hidden = true;
+    confirmField.hidden = true;
+    confirmPassword.required = false;
+    title.textContent = 'Choose an account action';
+    heading.textContent = 'Sign in to continue.';
+    description.textContent = 'Access your workspace, review recent activity, and pick up where you left off.';
+    message();
+  }
 
-  magicLink.addEventListener('click', async () => {
-    message('');
+  choices.addEventListener('click', event => {
+    const button = event.target.closest('[data-mode]');
+    if (button) show(button.dataset.mode);
+  });
+
+  query('#access-back').addEventListener('click', reset);
+
+  document.querySelectorAll('[data-password]').forEach(button => {
+    button.addEventListener('click', () => {
+      const input = query(`#${button.dataset.password}`);
+      const visible = input.type === 'text';
+      input.type = visible ? 'password' : 'text';
+      button.textContent = visible ? 'Show' : 'Hide';
+      button.setAttribute('aria-label', `${visible ? 'Show' : 'Hide'} ${input === confirmPassword ? 'password confirmation' : 'password'}`);
+    });
+  });
+
+  google.addEventListener('click', async () => {
+    message();
+    setBusy(true, 'Connecting to Google…');
+    try {
+      api.unwrap(await api.sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: callbackUrl() }
+      }));
+    } catch (error) {
+      message(error.message || 'Unable to continue with Google.', true);
+      setBusy(false);
+    }
+  });
+
+  magic.addEventListener('click', async () => {
+    message();
     if (!email.reportValidity()) return;
-    setBusy(true);
+    setBusy(true, 'Sending your sign-in link…');
     try {
       api.unwrap(await api.sb.auth.signInWithOtp({
         email: email.value.trim(),
-        options: { shouldCreateUser: false, emailRedirectTo: redirectUrl() }
+        options: { shouldCreateUser: false, emailRedirectTo: callbackUrl() }
       }));
+      setBusy(false);
       message('Check your email for a secure sign-in link.');
     } catch (error) {
-      message(error.message || 'Unable to send the sign-in link.', true);
-    } finally {
       setBusy(false);
+      message(error.message || 'Unable to send the sign-in link.', true);
     }
   });
 
   form.addEventListener('submit', async event => {
     event.preventDefault();
-    message('');
+    message();
     if (!form.reportValidity()) return;
-    setBusy(true);
+    if (mode === 'signup' && password.value !== confirmPassword.value) {
+      message('Passwords do not match.', true);
+      confirmPassword.focus();
+      return;
+    }
+
+    setBusy(true, mode === 'signup' ? 'Creating your account…' : 'Signing you in…');
     try {
       if (mode === 'signup') {
-        const name = fullName.value.trim();
-        if (!name) throw new Error('Enter your full name.');
         const result = api.unwrap(await api.sb.auth.signUp({
           email: email.value.trim(),
           password: password.value,
-          options: { data: { full_name: name }, emailRedirectTo: redirectUrl() }
+          options: { emailRedirectTo: callbackUrl() }
         }));
-        if (result.session) enterApp();
-        else message('Account created. Check your email to confirm your account.');
+        if (result.session) enterApplication();
+        else {
+          setBusy(false);
+          message('Account created. Check your email to confirm it, then sign in.');
+        }
       } else {
-        api.unwrap(await api.sb.auth.signInWithPassword({ email: email.value.trim(), password: password.value }));
-        enterApp();
+        api.unwrap(await api.sb.auth.signInWithPassword({
+          email: email.value.trim(),
+          password: password.value
+        }));
+        enterApplication();
       }
     } catch (error) {
-      message(error.message || 'Unable to sign in.', true);
-    } finally {
-      if (!redirecting) setBusy(false);
+      setBusy(false);
+      message(error.message || 'Unable to continue.', true);
     }
   });
 
   api.sb.auth.onAuthStateChange(event => {
-    if (event === 'SIGNED_IN') queueMicrotask(enterApp);
+    if (event === 'SIGNED_IN') queueMicrotask(proceed);
   });
 
   (async () => {
     try {
       const { session } = api.unwrap(await api.sb.auth.getSession());
-      if (session) enterApp();
-      else email.focus();
+      if (session) proceed();
+      else if (params.get('mode') === 'signup') show('signup');
     } catch (error) {
       message(error.message || 'Unable to check your session.', true);
     }

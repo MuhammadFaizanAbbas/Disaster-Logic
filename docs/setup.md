@@ -57,9 +57,9 @@ Payouts and payments are accounting records. This package does not process Strip
 
 ## Local preview and deployment
 
-Use any static development server. For example, `python3 -m http.server 8080` is a local preview command, not a production backend. Publish the project folder to your static host. Only public assets need hosting; `supabase/`, `tests/`, and documentation may be omitted from the hosted files.
+Use any static development server. For example, `python3 -m http.server 8080` is a local preview command, not a production backend. Publish the project folder to your static host. Only public assets need hosting; tests and documentation may be omitted from the hosted files.
 
-For future backend deployments, authenticate the Supabase CLI, link the project, apply tracked migrations, and deploy the functions. Commands should be checked against the installed CLI's `--help`. Function dependencies are pinned. A generated `database.types.ts` is included for developers; the frontend itself needs no TypeScript compiler.
+Manage future database and Edge Function changes through the connected Supabase project. The frontend itself needs no TypeScript compiler or local Supabase runtime.
 
 ## Verification and remaining configuration
 

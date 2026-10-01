@@ -1,8 +1,5 @@
 node_modules/
 .verification/
-supabase/.temp/
-supabase/.branches/
-supabase/.cache/
 .env
 .env.*
 !.env.example
