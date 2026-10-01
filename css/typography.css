@@ -1,0 +1,131 @@
+/* Locally bundled font; see assets/fonts/source-sans-3/LICENSE.md. */
+@font-face {
+  font-family: "Source Sans 3";
+  src: url("../assets/fonts/source-sans-3/source-sans-3-variable.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 200 900;
+  font-display: swap;
+}
+
+:root {
+  --font-ui: "Source Sans 3", "Segoe UI", Arial, sans-serif;
+}
+
+html,
+body,
+#app {
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-size: 14px;
+  font-weight: 400;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+b,
+strong,
+h1,
+h2,
+h3,
+.brand-name,
+.person-main,
+.job-main,
+.info-value,
+.mini-value,
+.form-title,
+.step-head {
+  font-weight: 600;
+}
+
+.page-title,
+.op-name,
+.panel-titlebar h2 {
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -.015em;
+}
+
+.nav-item {
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.nav-item.active,
+.primary,
+.secondary,
+.small-btn {
+  font-weight: 500;
+}
+
+.nav-label,
+.stat-label,
+.op-kicker,
+.info-label,
+.mini-label,
+.section-title,
+.data-table th {
+  font-weight: 600;
+  letter-spacing: .045em;
+}
+
+.info-label,
+.mini-label,
+.data-table th,
+.field label {
+  font-size: 10px;
+}
+
+.global-search input,
+.search-strip input,
+.field input,
+.field select,
+.field textarea,
+.data-table td {
+  font-size: 12px;
+}
+
+.small-btn,
+.select-like,
+.person-sub,
+.tiny,
+.stat-meta,
+.table-footer {
+  font-size: 11px;
+}
+
+.page-subtitle,
+.person-sub,
+.info-sub,
+.service-card p {
+  line-height: 1.4;
+}
+
+.badge,
+.status,
+.avatar,
+.nav-badge {
+  font-weight: 600;
+}
+
+.stat-value {
+  font-weight: 650;
+  line-height: 1.15;
+  letter-spacing: -.025em;
+}
+
+.stat-value,
+.stat-meta,
+.money,
+.nav-badge,
+.page-num {
+  font-variant-numeric: tabular-nums;
+}

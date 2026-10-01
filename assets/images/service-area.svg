@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 180" fill="none">
+  <rect width="780" height="180" fill="#e7ebdf"/>
+  <path d="M545-20c-29 38-28 60-2 80s6 44-19 61-42 42-36 79h61c-6-39 4-52 29-69s39-40 20-69-15-54 10-82Z" fill="#b7dee4"/>
+  <path d="M600 1h181v74H624ZM16 72h100v42H16ZM262 123h71v57h-71Z" fill="#cce0c6"/>
+  <g stroke="#fff" stroke-width="7">
+    <path d="M24 0v180M83 0v180M144 0v180M207 0v180M270 0v180M332 0v180M394 0v180M454 0v180M635 0v180M700 0v180M758 0v180"/>
+    <path d="M0 24h520m82 0h178M0 58h533m58 0h189M0 94h552m34 0h194M0 132h520m56 0h204M0 166h493m74 0h213"/>
+  </g>
+  <g stroke="#cad2c8" stroke-width="1"><path d="M24 0v180M83 0v180M144 0v180M207 0v180M270 0v180M332 0v180M394 0v180M454 0v180M635 0v180M700 0v180M758 0v180M0 24h520M0 58h533M0 94h552M0 132h520M0 166h493"/></g>
+  <path d="M-15 135 211 70l207 1L581-7M-10 119h800" stroke="#fff" stroke-width="13"/>
+  <path d="M-15 135 211 70l207 1L581-7M-10 119h800" stroke="#f1cd89" stroke-width="7"/>
+  <path d="m163-8 24 199" stroke="#fff" stroke-width="10"/>
+  <path d="m163-8 24 199" stroke="#f1cd89" stroke-width="5"/>
+  <g font-family="Arial,sans-serif" font-size="9" fill="#8a978d" text-anchor="middle"><text x="310" y="45" letter-spacing="2">NORTH DISTRICT</text><text x="370" y="148" font-size="13" letter-spacing="2">DOWNTOWN</text><text x="670" y="148" letter-spacing="2">BAYSIDE</text><text x="78" y="155">Central Avenue</text></g>
+</svg>
