@@ -72,6 +72,12 @@
     setBusy(true, 'Preparing your account…');
     try {
       const account = await api.call('profile', 'onboarding');
+      try {
+        const avatarUrl = await api.syncGoogleAvatar(account.profile);
+        if (avatarUrl && account.profile) account.profile.avatar_url = avatarUrl;
+      } catch {
+        // An avatar should never prevent account access.
+      }
       if (account.profile?.onboarding_completed_at) enterApplication();
       else window.DisasterOnboarding.start();
     } catch {

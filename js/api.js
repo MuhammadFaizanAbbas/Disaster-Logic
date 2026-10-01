@@ -45,5 +45,15 @@
     return receipt;
   }
   async function mediaUrl(path) { return unwrap(await sb.storage.from('opportunity-media').createSignedUrl(path, 300)).signedUrl; }
-  window.DisasterAPI = { sb, call, rpc, submitBooking, mediaUrl, unwrap };
+  async function syncGoogleAvatar(profile) {
+    if (profile?.avatar_url) return profile.avatar_url;
+    const { user } = unwrap(await sb.auth.getUser());
+    const providers = new Set([user?.app_metadata?.provider, ...(user?.app_metadata?.providers || [])]);
+    if (!providers.has('google')) return null;
+    const avatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
+    if (typeof avatarUrl !== 'string' || !/^https:\/\//i.test(avatarUrl)) return null;
+    await call('profile', 'update', { avatar_url: avatarUrl });
+    return avatarUrl;
+  }
+  window.DisasterAPI = { sb, call, rpc, submitBooking, mediaUrl, syncGoogleAvatar, unwrap };
 })();
