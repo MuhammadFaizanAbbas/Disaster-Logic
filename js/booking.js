@@ -15,7 +15,7 @@
   ];
   const windows = [ ['08:00-12:00', '8 AM – 12 PM'], ['12:00-16:00', '12 PM – 4 PM'], ['16:00-20:00', '4 PM – 8 PM'] ];
   const draft = {
-    zip: '', service: '', fullName: '', phone: '', email: '', notes: '',
+    zip: '', service: '', fullName: '', phone: '', email: '', notes: '', opportunityType: '',
     priority: 'scheduled', date: dateKey(tomorrow), timeWindow: '12:00-16:00', arrivalNotice: true, coordinates: null
   };
   let form = null;
@@ -23,11 +23,13 @@
   let files = [];
   let submitHandler = null;
   let submitting = false;
-  let progressStep = 1;
+  let progressValue = -1;
+  let requestReady = false;
+  let dispatchTouched = false;
   let syncTimer = null;
   let stickyObserver = null;
   let headerObserver = null;
-  const panelAnimations = new Map();
+  const touchedDetails = new Set();
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const stepLabels = ['Location', 'Service Type', 'Customer Details', 'Timing & Dispatch'];
   const shortLabels = ['Location', 'Service', 'Details', 'Dispatch'];
@@ -47,10 +49,13 @@
       <header class="booking-header"><h1>Book Emergency & Disaster Repair</h1><p>Quick triage intake to get the right team to your property. Tell us what happened, where, and when.</p></header>
       <div class="booking-progress-anchor" aria-hidden="true"></div>
       <div class="booking-progress-shell">
-        <div class="booking-progress-meter" role="progressbar" aria-label="Booking progress" aria-valuemin="1" aria-valuemax="4" aria-valuenow="1" aria-valuetext="Step 1 of 4: Location"><span class="booking-progress-fill"></span></div>
+        <button type="button" class="mobile-menu booking-menu" data-action="menu" aria-label="Open navigation" aria-controls="main-navigation" aria-expanded="false">${icon('menu', 21)}</button>
+        <div class="booking-progress-track">
+        <div class="booking-progress-meter" role="progressbar" aria-label="Booking completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="0% complete"><span class="booking-progress-fill"></span></div>
         <ol class="booking-progress" aria-label="Booking steps">
-          ${stepLabels.map((label, index) => `<li data-booking-step="${index + 1}"><button type="button" class="booking-step-link" data-booking-go="${index + 1}" aria-label="Step ${index + 1}: ${label}" ${index > 0 ? 'disabled' : ''}><span class="booking-step-dot">${index + 1}</span><span class="booking-step-title">${label}</span><span class="booking-step-short">${shortLabels[index]}</span></button></li>`).join('')}
+          ${stepLabels.map((label, index) => `<li data-booking-step="${index + 1}"><button type="button" class="booking-step-link" data-booking-go="${index + 1}" aria-label="Go to ${label}"><span class="booking-step-dot">${index + 1}</span><span class="booking-step-title">${label}</span><span class="booking-step-short">${shortLabels[index]}</span></button></li>`).join('')}
         </ol>
+        </div>
         <span class="booking-progress-announcement" aria-live="polite" aria-atomic="true"></span>
       </div>
       <form id="booking-form" class="booking-form" novalidate>
@@ -65,16 +70,16 @@
           </div>
         </fieldset></div>
 
-        <div class="booking-step-panel" data-step-panel="2" hidden><fieldset class="booking-section" disabled><legend tabindex="-1"><span class="booking-section-number">2</span> Select Required Service Type</legend>
+        <div class="booking-step-panel" data-step-panel="2"><fieldset class="booking-section"><legend tabindex="-1"><span class="booking-section-number">2</span> Select Required Service Type</legend>
           <div class="booking-services">${serviceTypes.map(serviceCard).join('')}</div>
         </fieldset></div>
 
-        <div class="booking-step-panel" data-step-panel="3" hidden><fieldset class="booking-section" disabled><legend tabindex="-1"><span class="booking-section-number">3</span> Customer Details & Damage Scope</legend>
+        <div class="booking-step-panel" data-step-panel="3"><fieldset class="booking-section"><legend tabindex="-1"><span class="booking-section-number">3</span> Customer Details & Damage Scope</legend>
           <div class="booking-contact-grid">
-            <label class="booking-field"><span>Full name <span aria-hidden="true">*</span></span><input name="fullName" autocomplete="name" placeholder="Sarah Jenkins" value="${escape(draft.fullName)}" maxlength="120" required></label>
-            <label class="booking-field"><span>Phone number <span aria-hidden="true">*</span></span><input name="phone" type="tel" autocomplete="tel" placeholder="+1 (555) 000-0000" value="${escape(draft.phone)}" maxlength="30" required></label>
+            <label class="booking-field"><span>Full name <span aria-hidden="true">*</span></span><input name="fullName" autocomplete="name" placeholder="Sarah Jenkins" value="${escape(draft.fullName)}" maxlength="120" aria-describedby="booking-name-error" required><small id="booking-name-error" class="booking-field-error" data-detail-error="fullName" aria-live="polite" hidden></small></label>
+            <label class="booking-field"><span>Phone number <span aria-hidden="true">*</span></span><input name="phone" type="tel" autocomplete="tel" placeholder="+1 (555) 000-0000" value="${escape(draft.phone)}" maxlength="30" aria-describedby="booking-phone-error" required><small id="booking-phone-error" class="booking-field-error" data-detail-error="phone" aria-live="polite" hidden></small></label>
           </div>
-          <label class="booking-field"><span>Email address for booking confirmation <span aria-hidden="true">*</span></span><input name="email" type="email" autocomplete="email" placeholder="s.jenkins@example.com" value="${escape(draft.email)}" maxlength="254" required></label>
+          <label class="booking-field"><span>Email address for booking confirmation <span aria-hidden="true">*</span></span><input name="email" type="email" autocomplete="email" placeholder="s.jenkins@example.com" value="${escape(draft.email)}" maxlength="254" aria-describedby="booking-email-error" required><small id="booking-email-error" class="booking-field-error" data-detail-error="email" aria-live="polite" hidden></small></label>
           <label class="booking-field"><span>Urgent damage notes & access details</span><textarea name="notes" rows="4" maxlength="3000" placeholder="Tell us what happened, where the damage is, and any important access details. Include gate codes or site hazards if needed.">${escape(draft.notes)}</textarea></label>
           <label class="booking-upload" data-file-drop>
             <input class="booking-file-input" type="file" name="evidence" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime" multiple>
@@ -87,7 +92,7 @@
           <p class="booking-field-error" data-upload-error role="alert" hidden></p>
         </fieldset></div>
 
-        <div class="booking-step-panel" data-step-panel="4" hidden><fieldset class="booking-section" disabled><legend tabindex="-1"><span class="booking-section-number">4</span> Dispatch Priority & Availability</legend>
+        <div class="booking-step-panel" data-step-panel="4"><fieldset class="booking-section"><legend tabindex="-1"><span class="booking-section-number">4</span> Dispatch Priority & Availability</legend>
           <div class="booking-dispatch-grid">
             <div class="booking-dispatch-card"><label class="booking-dispatch-choice"><input type="radio" name="priority" value="emergency" ${draft.priority === 'emergency' ? 'checked' : ''}><span class="booking-dispatch-icon emergency">${icon('flame', 20)}</span><strong>Emergency Dispatch</strong><span class="booking-choice-mark" aria-hidden="true"></span></label><p>Time-sensitive property damage? Request the earliest available emergency response.</p></div>
             <div class="booking-dispatch-card"><label class="booking-dispatch-choice"><input type="radio" name="priority" value="scheduled" ${draft.priority === 'scheduled' ? 'checked' : ''}><span class="booking-dispatch-icon">${icon('calendar', 19)}</span><strong>Scheduled Service Window</strong><span class="booking-choice-mark" aria-hidden="true"></span></label>
@@ -99,10 +104,17 @@
               </fieldset>
             </div>
           </div>
+          <label class="booking-field booking-opportunity-type"><span>Opportunity type <span aria-hidden="true">*</span></span>
+            <select name="opportunityType" required>
+              <option value="" disabled ${!draft.opportunityType ? 'selected' : ''}>Select opportunity type</option>
+              <option value="public" ${draft.opportunityType === 'public' ? 'selected' : ''}>Public</option>
+              <option value="private" ${draft.opportunityType === 'private' ? 'selected' : ''}>Private</option>
+            </select>
+          </label>
         </fieldset></div>
-        <div class="booking-actions" hidden>
+        <div class="booking-actions">
         <p class="booking-result" role="status" aria-live="polite" tabindex="-1" hidden></p>
-        <button class="booking-submit primary" type="submit" disabled>Confirm & Request ${icon('chevron', 15)}</button>
+        <button class="booking-submit primary" type="submit">Confirm & Request ${icon('chevron', 15)}</button>
         </div>
       </form>
     </article>`;
@@ -110,76 +122,92 @@
 
   function capture() {
     if (!form) return;
-    // Read controls directly: a locked section must not erase the user's draft.
-    for (const key of ['zip', 'service', 'fullName', 'phone', 'email', 'notes', 'priority']) draft[key] = form.elements.namedItem(key).value;
+    // Read controls directly so switching dispatch modes preserves the schedule.
+    for (const key of ['zip', 'service', 'fullName', 'phone', 'email', 'notes', 'priority', 'opportunityType']) draft[key] = form.elements.namedItem(key).value.trim();
     draft.date = form.elements.namedItem('date').value;
     draft.timeWindow = form.elements.namedItem('timeWindow').value;
     draft.arrivalNotice = form.elements.namedItem('arrivalNotice').checked;
   }
 
-  function setPanelVisible(panel, visible, animate) {
-    const section = panel.querySelector('.booking-section');
-    section.disabled = !visible;
-    panel.inert = !visible;
-    if (panel.dataset.open === String(visible)) return;
-    panel.dataset.open = String(visible);
-    const startingHeight = panel.getBoundingClientRect().height;
-    panelAnimations.get(panel)?.cancel();
-    panelAnimations.delete(panel);
-    if (!animate || reducedMotion.matches) {
-      panel.hidden = !visible;
-      panel.classList.remove('is-animating');
-      return;
-    }
-    panel.hidden = false;
-    const endingHeight = visible ? panel.scrollHeight : 0;
-    panel.classList.add('is-animating');
-    const animation = panel.animate([
-      { height: `${startingHeight}px`, opacity: startingHeight ? 1 : 0, transform: startingHeight ? 'translateY(0)' : 'translateY(12px)' },
-      { height: `${endingHeight}px`, opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(-6px)' }
-    ], { duration: 380, easing: 'cubic-bezier(.22, 1, .36, 1)' });
-    panelAnimations.set(panel, animation);
-    animation.finished.then(() => {
-      if (panelAnimations.get(panel) !== animation) return;
-      panel.hidden = !visible;
-      panel.classList.remove('is-animating');
-      panelAnimations.delete(panel);
-    }).catch(() => { /* A subsequent edit can reverse an in-progress reveal. */ });
+  function detailErrors() {
+    const digits = draft.phone.replace(/\D/g, '');
+    return {
+      fullName: draft.fullName.length < 2 ? 'Enter your full name (at least 2 characters).' : '',
+      phone: digits.length < 8 || digits.length > 15 ? 'Enter a phone number with 8–15 digits, including the area code.' : '',
+      email: !draft.email || form.elements.namedItem('email').validity.typeMismatch ? 'Enter a valid email address, such as name@example.com.' : ''
+    };
   }
 
-  function syncForm(animate = true) {
+  function showDetailErrors(errors, showAll = false) {
+    for (const [key, message] of Object.entries(errors)) {
+      const input = form.elements.namedItem(key);
+      const error = form.querySelector(`[data-detail-error="${key}"]`);
+      const show = Boolean(message) && (showAll || touchedDetails.has(key));
+      input.setCustomValidity(message);
+      if (show) input.setAttribute('aria-invalid', 'true'); else input.removeAttribute('aria-invalid');
+      error.textContent = show ? message : '';
+      error.hidden = !show;
+    }
+  }
+
+  function goToStep(step) {
+    const panel = form?.querySelector(`[data-step-panel="${step}"]`);
+    if (!panel) return;
+    panel.querySelector('legend').focus({ preventScroll: true });
+    panel.scrollIntoView({ behavior: reducedMotion.matches ? 'instant' : 'smooth', block: 'start' });
+  }
+
+  function validateDispatch() {
+    const date = form.elements.namedItem('date');
+    const now = new Date();
+    date.min = dateKey(now);
+    date.setCustomValidity('');
+    if (draft.priority === 'emergency') return true;
+    if (draft.priority !== 'scheduled') return false;
+    if (draft.date === dateKey(now) && Number(draft.timeWindow.slice(0, 2)) * 60 <= now.getHours() * 60 + now.getMinutes()) {
+      date.setCustomValidity('Choose a future arrival window or another date.');
+    }
+    return date.validity.valid && windows.some(([value]) => value === draft.timeWindow);
+  }
+
+  function syncForm(announce = true) {
     if (!form) return;
     form.querySelector('.booking-schedule').disabled = draft.priority !== 'scheduled';
     form.elements.namedItem('zip').required = !draft.coordinates;
-    const zipValid = /^\d{5}(-\d{4})?$/.test(draft.zip) || Boolean(draft.coordinates);
-    const phoneDigits = draft.phone.replace(/\D/g, '').length;
-    const email = form.elements.namedItem('email');
-    // typeMismatch remains useful even when a parent fieldset is disabled.
-    const detailsValid = draft.fullName.trim().length > 1 && phoneDigits >= 8 && phoneDigits <= 15 && !email.validity.typeMismatch && Boolean(draft.email.trim());
-    const completed = [zipValid, serviceTypes.some(service => service.id === draft.service), detailsValid, false];
+    const zipValid = form.elements.namedItem('zip').validity.valid;
+    const errors = detailErrors();
+    const detailsValid = !Object.values(errors).some(Boolean);
+    showDetailErrors(errors);
+    const serviceValid = serviceTypes.some(service => service.id === draft.service);
+    const dispatchValid = validateDispatch() && ['public', 'private'].includes(draft.opportunityType);
+    const completed = [zipValid, serviceValid, detailsValid, dispatchValid && (dispatchTouched || (zipValid && serviceValid && detailsValid))];
     const current = completed.findIndex(value => !value);
-    const previousStep = progressStep;
-    progressStep = current + 1;
+    requestReady = completed.every(Boolean);
+    // Each section contributes a quarter; contact fields fill their quarter gradually.
+    const detailsProgress = Object.values(errors).filter(message => !message).length / 3;
+    const fraction = (Number(zipValid) + Number(serviceValid) + detailsProgress + Number(completed[3])) / 4;
+    const percent = Math.round(fraction * 100);
     const card = form.closest('.booking-card');
-    card.querySelectorAll('[data-step-panel]').forEach((panel, index) => setPanelVisible(panel, index <= current, animate));
     card.querySelectorAll('[data-booking-step]').forEach((item, index) => {
-      const isComplete = completed[index] && index < current;
+      const isComplete = completed[index];
       item.classList.toggle('is-complete', isComplete);
       item.classList.toggle('is-current', index === current);
       if (index === current) item.setAttribute('aria-current', 'step'); else item.removeAttribute('aria-current');
-      item.querySelector('button').disabled = index > current;
       item.querySelector('.booking-step-dot').innerHTML = isComplete ? icon('check', 12) : String(index + 1);
     });
     const progress = card.querySelector('.booking-progress-shell');
-    progress.style.setProperty('--booking-progress', String(current / 3));
+    progress.style.setProperty('--booking-progress', String(fraction));
+    progress.classList.toggle('has-progress', fraction > 0);
+    progress.classList.toggle('is-finished', requestReady);
     const meter = progress.querySelector('[role="progressbar"]');
-    meter.setAttribute('aria-valuenow', String(progressStep));
-    meter.setAttribute('aria-valuetext', `Step ${progressStep} of 4: ${stepLabels[current]}`);
-    if (animate && previousStep !== progressStep) {
-      progress.querySelector('.booking-progress-announcement').textContent = `Step ${progressStep} of 4: ${stepLabels[current]} ${progressStep > previousStep ? 'is now available.' : 'needs to be completed.'}`;
+    const status = `${percent}% complete. ${requestReady ? 'Ready to request service.' : `${stepLabels[current]} needs to be completed.`}`;
+    meter.setAttribute('aria-valuenow', String(percent));
+    meter.setAttribute('aria-valuetext', status);
+    if (announce && progressValue !== percent) {
+      progress.querySelector('.booking-progress-announcement').textContent = status;
     }
-    form.querySelector('.booking-actions').hidden = progressStep !== 4;
-    form.querySelector('[type="submit"]').disabled = progressStep !== 4 || submitting;
+    progressValue = percent;
+    form.querySelector('[type="submit"]').disabled = submitting;
   }
 
   function setupStickyProgress() {
@@ -188,7 +216,7 @@
     const progress = card.querySelector('.booking-progress-shell');
     const header = document.querySelector('.topbar');
     const observe = () => {
-      const top = Math.ceil(header.getBoundingClientRect().height);
+      const top = header ? Math.ceil(header.getBoundingClientRect().height) : 0;
       card.style.setProperty('--booking-sticky-top', `${top}px`);
       stickyObserver?.disconnect();
       const update = () => progress.classList.toggle('is-compact', anchor.getBoundingClientRect().top <= top);
@@ -196,8 +224,10 @@
       stickyObserver.observe(anchor);
       update();
     };
-    headerObserver = new ResizeObserver(observe);
-    headerObserver.observe(header);
+    if (header) {
+      headerObserver = new ResizeObserver(observe);
+      headerObserver.observe(header);
+    }
     observe();
   }
 
@@ -251,6 +281,7 @@
     return {
       location: { postal_code: draft.zip.trim() || null, coordinates: draft.coordinates ? { ...draft.coordinates } : null },
       service_type: draft.service,
+      opportunity_type: draft.opportunityType,
       customer: { full_name: draft.fullName.trim(), phone: draft.phone.trim(), email: draft.email.trim() },
       damage_notes: draft.notes.trim(),
       dispatch: {
@@ -271,20 +302,9 @@
     syncForm(false);
     const activeForm = form;
     activeForm.classList.add('was-validated');
-    const name = activeForm.elements.namedItem('fullName');
-    const phone = activeForm.elements.namedItem('phone');
-    name.setCustomValidity(draft.fullName.trim().length < 2 ? 'Enter your full name.' : '');
-    const digits = draft.phone.replace(/\D/g, '');
-    phone.setCustomValidity(digits.length < 8 || digits.length > 15 ? 'Enter a valid phone number, including the area code.' : '');
-    const date = activeForm.elements.namedItem('date');
-    date.min = dateKey(new Date());
-    date.setCustomValidity('');
-    if (draft.priority === 'scheduled' && draft.date === dateKey(new Date())) {
-      const now = new Date();
-      const startHour = Number(draft.timeWindow.slice(0, 2));
-      if (startHour * 60 <= now.getHours() * 60 + now.getMinutes()) date.setCustomValidity('Choose a future arrival window or another date.');
-    }
-    if (!activeForm.reportValidity() || progressStep !== 4) return;
+    Object.keys(detailErrors()).forEach(key => touchedDetails.add(key));
+    showDetailErrors(detailErrors(), true);
+    if (!activeForm.reportValidity() || !requestReady) return;
     const request = payload();
     const result = activeForm.querySelector('.booking-result');
     result.hidden = false;
@@ -310,8 +330,9 @@
       result.textContent = 'Your request could not be sent. Your details are still here; please try again.';
     } finally {
       submitting = false;
-      button.disabled = form !== activeForm || progressStep !== 4;
+      button.disabled = false;
       button.innerHTML = originalLabel;
+      if (form !== activeForm) syncForm(false);
     }
   }
 
@@ -323,6 +344,7 @@
     let zoom = 1;
     form.addEventListener('input', event => {
       event.target.setCustomValidity?.('');
+      if (['priority', 'date', 'timeWindow', 'arrivalNotice', 'opportunityType'].includes(event.target.name)) dispatchTouched = true;
       capture();
       if (event.target.name === 'zip') {
         draft.coordinates = null;
@@ -335,6 +357,13 @@
     }, options);
     form.addEventListener('change', event => {
       if (event.target.type === 'file') { selectFiles(event.target.files); event.target.value = ''; }
+      clearTimeout(syncTimer);
+      if (['priority', 'date', 'timeWindow', 'arrivalNotice', 'opportunityType'].includes(event.target.name)) dispatchTouched = true;
+      capture(); syncForm();
+    }, options);
+    form.addEventListener('focusout', event => {
+      if (event.relatedTarget?.matches('[type="submit"]')) return;
+      if (['fullName', 'phone', 'email'].includes(event.target.name)) touchedDetails.add(event.target.name);
       clearTimeout(syncTimer);
       capture(); syncForm();
     }, options);
@@ -355,13 +384,11 @@
     form.closest('.booking-card').addEventListener('click', event => {
       const button = event.target.closest('[data-booking-go]');
       if (!button || button.disabled) return;
-      const panel = form.querySelector(`[data-step-panel="${button.dataset.bookingGo}"]`);
-      panel.querySelector('legend').focus({ preventScroll: true });
-      panel.scrollIntoView({ behavior: reducedMotion.matches ? 'instant' : 'smooth', block: 'start' });
+      goToStep(Number(button.dataset.bookingGo));
     }, options);
     if (draft.coordinates) showLocation(`Location captured: ${draft.coordinates.latitude.toFixed(4)}, ${draft.coordinates.longitude.toFixed(4)}. ZIP code is optional.`);
     else if (draft.zip) showLocation(`Service ZIP: ${draft.zip}. Availability will be confirmed with your request.`);
-    progressStep = 1;
+    progressValue = -1;
     syncForm(false); renderFiles(); setupStickyProgress();
   }
 
@@ -372,8 +399,6 @@
     headerObserver?.disconnect();
     stickyObserver = null;
     headerObserver = null;
-    for (const animation of panelAnimations.values()) animation.cancel();
-    panelAnimations.clear();
     listeners?.abort();
     listeners = null;
     form = null;

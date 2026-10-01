@@ -6,13 +6,24 @@ The form and its behavior live in `js/booking.js`; its styles live in `css/booki
 The dark-mode preference is managed by `js/theme.js` and saved under `disaster-logic-theme`.
 Customer details and attachments stay in memory during navigation; they are not saved in browser storage.
 
-Sections unlock in order: a valid ZIP or captured location, an explicitly selected service,
-valid customer details, then dispatch preferences. Changing an earlier answer to an invalid value
-locks the later sections without clearing their data. Section reveals and progress transitions
-respect the browser's reduced-motion preference.
+All four sections and the final request button are visible immediately. Users can fill them in any
+order; changing an answer never hides another section or automatically scrolls the page.
 
-The progress bar sticks immediately below the app header and becomes compact on scroll.
-Available step labels can be selected to return to the corresponding section.
+The booking page fills the workspace beside the sidebar, without the dashboard toolbar.
+On mobile, the navigation toggle is part of the progress strip.
+The progress bar sticks to the top of the viewport and becomes compact on scroll.
+Its fill advances smoothly as valid details are entered, with two overlapping water waves and animated
+completion markers. Each section contributes 25%; valid contact fields fill their section gradually.
+The default schedule counts once the preceding sections are complete, or after a dispatch control is
+changed. A valid, fully completed form reaches 100%; this does not mean it has been submitted.
+Waves settle at completion. Reduced-motion users see a static fill and instant progress updates.
+Every step label is always available for jumping to that section.
+
+Contact details are checked on input, change, and focus loss. Inline messages explain invalid fields.
+The final **Confirm & Request** button reads current values (including autofill) and validates the
+whole form before preparing or submitting a request. Notes and attachments remain optional.
+The **Opportunity type** field at the end requires an explicit **Public** or **Private** selection,
+which is retained in the draft and included in the final section's completion check.
 
 ## Submission hook
 
@@ -29,6 +40,7 @@ window.BookingView.setSubmitHandler(async ({ request, files }) => {
 
 - `location`: `postal_code` and optional `coordinates` (latitude/longitude).
 - `service_type`: the selected service ID.
+- `opportunity_type`: `public` or `private` (required).
 - `customer`: `full_name`, `phone`, and `email`.
 - `damage_notes`.
 - `dispatch`: `priority`, `preferred_date`, `time_window`, `arrival_notice`, and `time_zone`.

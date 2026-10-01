@@ -29,7 +29,8 @@ function topbar(){
 }
 
 function layout(content){
-  return `<div class="shell ${state.menuOpen?'menu-open':''}">${sidebar()}<button class="sidebar-overlay" aria-label="Close menu" data-action="menu" tabindex="-1"></button><main class="workspace">${topbar()}<div class="content">${content}</div></main></div>`;
+  const booking = state.route === 'new-service';
+  return `<div class="shell ${booking?'booking-layout':''} ${state.menuOpen?'menu-open':''}">${sidebar()}<button class="sidebar-overlay" aria-label="Close menu" data-action="menu" tabindex="-1"></button><main class="workspace">${booking?'':topbar()}<div class="content">${content}</div></main></div>`;
 }
 
 function pageHead(title, subtitle, actions='', eyebrow=''){

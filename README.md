@@ -8,7 +8,8 @@ Open `index.html` in a browser. No server, package installation, or build step i
 
 - Dashboard, opportunities, projects, referrals, customers, personnel, and service views.
 - Responsive sidebar and persistent light/dark theme.
-- Progressive service booking with validated section reveals, smooth animations, and a compact sticky progress bar.
+- Complete service booking form with all sections visible, smooth completion animations, and a compact sticky progress bar.
+- Full-width booking workspace without the dashboard toolbar, flowing progress animation, and inline contact validation.
 - Customer details, attachment selection, and emergency or scheduled dispatch preferences.
 - Locally bundled Source Sans 3 font.
 
