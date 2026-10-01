@@ -25,7 +25,7 @@ Read [schema.md](docs/schema.md) for table relationships and role access, [api.m
 
 | Path | Purpose |
 |---|---|
-| `index.html`, `css/`, `assets/` | Static layout, styles, local font and illustrated map |
+| `index.html`, `login.html`, `css/`, `assets/` | Authenticated app entry, dedicated login page, styles, local font and illustrated map |
 | `js/live-app.js` | Authentication and live dashboard views |
 | `js/api.js`, `js/config.js` | Supabase client and request mapping |
 | `js/booking.js` | Public/internal booking form and validation |
@@ -35,6 +35,6 @@ Read [schema.md](docs/schema.md) for table relationships and role access, [api.m
 | `supabase/database.types.ts` | Generated database types for future development |
 | `tests/database_workflows.sql` | Transactional workflow/access tests; all fixtures roll back |
 
-The original `js/app.js` and `js/data.js` are retained as unloaded design references. `index.html` loads the live application instead; no sample dashboard data is presented to users.
+The original `js/app.js` and `js/data.js` are retained as unloaded design references. `index.html` loads the live application and sends signed-out users to `login.html`; no sample dashboard data is presented to users.
 
 Payment/payout fields record accounting state; payment processing and automated invitation delivery need configured external providers. The Flood Team's detailed room, drying, contract, and payment tables are supported by the schema; this frontend provides the core dashboards and workflow forms described above.

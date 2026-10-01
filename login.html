@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1d3046">
+  <title>Sign in | Disaster Logic</title>
+  <script src="js/theme.js"></script>
+  <link rel="preload" href="assets/fonts/source-sans-3/source-sans-3-variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/typography.css">
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/live.css">
+</head>
+<body class="login-body">
+  <main class="login-shell">
+    <section class="login-intro" aria-label="Disaster Logic">
+      <div class="login-brand">
+        <span class="login-brand-mark" aria-hidden="true">DL</span>
+        <span>
+          <strong>Disaster Logic</strong>
+          <small>Restoration operations</small>
+        </span>
+      </div>
+      <div class="login-intro-copy">
+        <p class="login-eyebrow">One workspace. Every response.</p>
+        <h1>Coordinate restoration work from intake to completion.</h1>
+        <p>Manage service requests, projects, customers, crews, and referrals in one secure workspace.</p>
+      </div>
+      <p class="login-security-note">Secure access powered by Supabase.</p>
+    </section>
+
+    <section class="login-panel" aria-labelledby="login-title">
+      <div class="login-card">
+        <div class="login-heading">
+          <p class="login-eyebrow" id="login-kicker">Welcome back</p>
+          <h2 id="login-title">Sign in to your account</h2>
+          <p id="login-description">Enter your workspace email and password.</p>
+        </div>
+
+        <form id="login-form" class="login-form">
+          <div class="login-field" id="name-field" hidden>
+            <label for="full-name">Full name</label>
+            <input id="full-name" name="full_name" type="text" autocomplete="name" maxlength="120">
+          </div>
+          <div class="login-field">
+            <label for="email">Email address</label>
+            <input id="email" name="email" type="email" autocomplete="username" placeholder="you@company.com" required>
+          </div>
+          <div class="login-field">
+            <div class="login-label-row">
+              <label for="password">Password</label>
+              <button class="login-text-button" id="toggle-password" type="button" aria-controls="password">Show</button>
+            </div>
+            <input id="password" name="password" type="password" autocomplete="current-password" minlength="8" required>
+          </div>
+
+          <p class="login-feedback" id="login-feedback" role="status" aria-live="polite"></p>
+          <button class="primary login-submit" id="login-submit" type="submit">Sign in</button>
+        </form>
+
+        <div class="login-divider" id="login-divider"><span>or</span></div>
+        <button class="secondary login-alt" id="magic-link" type="button">Email me a sign-in link</button>
+        <p class="login-switch"><span id="mode-prompt">New to Disaster Logic?</span> <button class="login-text-button" id="mode-toggle" type="button">Create an account</button></p>
+      </div>
+      <button class="login-theme" type="button" data-action="theme" aria-label="Toggle dark mode">Toggle theme</button>
+    </section>
+  </main>
+
+  <noscript><p class="login-noscript">JavaScript is required to sign in.</p></noscript>
+  <script defer src="js/vendor/supabase.js"></script>
+  <script defer src="js/config.js"></script>
+  <script defer src="js/api.js"></script>
+  <script defer src="js/login.js"></script>
+</body>
+</html>

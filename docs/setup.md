@@ -35,7 +35,7 @@ No first-account auto-promotion exists: public registration cannot grant platfor
 
 ## Authentication email settings
 
-In Supabase Auth URL Configuration, set your static site's URL and add its allowed redirect URLs. Email sign-in and confirmation links must return to that origin. Include URLs containing the `ref` query parameter for referral sign-in. Configure custom SMTP for real external recipients; Supabase's built-in test mail service has recipient and rate restrictions.
+In Supabase Auth URL Configuration, set your static site's URL and add its allowed redirect URLs. Include the deployed `login.html` URL for account confirmation and email-link sign-in. Email sign-in and confirmation links must return to that origin. Include URLs containing the `ref` query parameter for referral sign-in. Configure custom SMTP for real external recipients; Supabase's built-in test mail service has recipient and rate restrictions.
 
 Recipients can sign in with an email link. Individual referral accounts are provisioned in the Edge Function when a link is created; their address remains unconfirmed until they verify it. A provisioning error is returned as `account_warning`; the referral itself remains saved. A recipient may also create their account through the app. Phone-only recipients require a configured Supabase SMS provider and verified phone sign-in; the supplied UI implements email sign-in, so use email invitations for the current UI.
 
