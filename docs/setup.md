@@ -45,7 +45,7 @@ Recipients can sign in with an email link. Individual referral accounts are prov
 - Referral portal: `index.html?ref=REFERRAL_TOKEN`
 - Internal booking: New Service Request in the signed-in dashboard.
 
-Every workspace has a unique public booking key. Public submission always creates a public Opportunity. An internal member or platform admin may choose Public or Private. The workspace's selected services drive the form. ZIP codes remain required even when geolocation is captured.
+Every workspace has a unique public booking key. Public submission always creates a public Opportunity. An internal member or platform admin may choose Public or Private. The workspace's selected services drive the form. ZIP codes remain required even when geolocation is captured. While an Opportunity is open (`new` or `offered`), a public Opportunity appears across the platform for workspaces with its service selected under Core Services; private Opportunities remain workspace-only.
 
 Files upload to the private `opportunity-media` bucket using an expiring upload capability. Only authorized project/opportunity viewers can create a signed download URL. Booking retries retain their receipt in page memory to avoid creating another Opportunity after a partial upload failure; refreshing the page clears this retry state.
 

@@ -5,7 +5,7 @@ The booking form in `js/booking.js` is connected by `js/live-app.js` to `js/api.
 - Public form: `index.html?booking=WORKSPACE_PUBLIC_KEY`.
 - Internal form: sign in, select a workspace, and choose New Service Request.
 - Enabled services come from the workspace configuration.
-- ZIP/postal code is required for matching. Geolocation captures coordinates but does not reverse-geocode a ZIP.
+- ZIP/postal code remains required for the job location and referral coverage workflows. Public, open Opportunities are distributed platform-wide by matching the service to each workspace's Core Services; this distribution does not require matching ZIP coverage.
 - Public submissions are public Opportunities. Internal members may also choose private visibility.
 - Attachments upload into a private bucket with an expiring capability; allowed formats are JPEG, PNG, WebP, MP4, WebM and MOV, up to five files, 10 MB each.
 

@@ -45,7 +45,7 @@ flowchart TD
 
 Accepting a referral does not move the project into another workspace or create another project. The receiving user is attached to the originating project, with referral membership in its workspace. Incoming workspace referrals remain visible in that receiving user's My Projects while they act in the receiving workspace.
 
-An individual claim requires a confirmed matching Auth email (or matching confirmed phone for phone-only invitations). Workspace referrals require an admin of the named workspace. Open listings require active internal membership, matching services, and ZIP coverage. Project row locks and a unique partial index prevent competing claims. Closed projects cannot be newly referred.
+An individual claim requires a confirmed matching Auth email (or matching confirmed phone for phone-only invitations). Workspace referrals require an admin of the named workspace. Public Opportunities in `new` or `offered` status are visible platform-wide to active internal members whose workspace has the matching Core Service; ZIP coverage does not limit that Opportunity feed. Explicit open referral listings continue to require matching services and ZIP coverage. Project row locks and a unique partial index prevent competing claims. Closed projects cannot be newly referred.
 
 Direct client writes to protected intake/project/referral workflow tables are revoked. Checked RPCs enforce ownership, recipient identity, status transitions and last-admin protection. Browser callers never receive a service-role/secret API key. Edge Functions normally query as the caller, preserving RLS; only account provisioning uses the privileged Auth API after referral creation has been authorized.
 
