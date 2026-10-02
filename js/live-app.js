@@ -7,7 +7,7 @@
   const label=v=>String(v||'').replace(/_/g,' '), money=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(n||0));
   const badge=(v,type='')=>`<span class="badge ${esc(type)}">${esc(label(v))}</span>`;
   const initials=name=>String(name||'?').trim().split(/\s+/).map(x=>x[0]).slice(0,2).join('').toUpperCase();
-  const avatar=(name,extra='')=>`<span class="avatar ${esc(extra)}">${esc(initials(name))}</span>`;
+  const avatar=(name,extra='',url='')=>{if(!url&&['user-list','user-management','user-tiers'].includes(s.route.split('/')[0])){const member=s.cache.people?.find(m=>(m.profiles?.full_name||m.profiles?.email||'Account')===name);url=member?.profiles?.avatar_url||'';}return url?`<img class="avatar avatar-photo ${esc(extra)}" src="${esc(url)}" alt="${esc(name||'User avatar')}" referrerpolicy="no-referrer">`:`<span class="avatar ${esc(extra)}">${esc(initials(name))}</span>`;};
   const tags=items=>`<div class="tags">${(items||[]).filter(Boolean).map(x=>`<span class="tag">${esc(label(x))}</span>`).join('')}</div>`;
   const date=v=>v?new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',year:'numeric'}).format(new Date(v)):'Not scheduled';
   const address=o=>[o?.address,o?.city,o?.state,o?.postal_code].filter(Boolean).join(', ');
@@ -76,7 +76,7 @@
   }
 
   async function members(tiers){
-    const [people,sv]=await Promise.all([call('profile','members'),tiers?call('profile','services'):Promise.resolve(null)]);s.cache.people=people;
+    const [people,sv]=await Promise.all([call('profile','workspace_members'),tiers?call('profile','services'):Promise.resolve(null)]);s.cache.people=people;
     if(tiers){const enabled=sv.services.filter(x=>sv.selected.some(v=>v.service_id===x.id));const rows=people.filter(m=>m.member_type==='internal').map(m=>`<article class="panel user-row">${avatar(m.profiles?.full_name||m.profiles?.email)}<div class="user-meta"><b>${esc(m.profiles?.full_name||m.profiles?.email)}</b>${badge(m.job_title||m.role)}${badge(m.status,statusType(m.status))}</div>${form('tiers',enabled.map(x=>{const v=m.member_services.find(item=>item.service_id===x.id);return `<div class="tier-control">${select(x.name,`tier-${x.id}`,[['','Not assigned'],[1,'Tier 1'],[2,'Tier 2'],[3,'Tier 3']],v?.tier??'')}${select('Verification',`verification-${x.id}`,['unverified','pending','verified','rejected'].map(value=>[value,label(value)]),v?.verification_status)}</div>`;}).join(''),m.user_id)}</article>`).join('');return `${head('User Tiers','Set service verification and dispatch priority for internal team members.',`<span class="badge">${people.length} total</span>`)}<div class="users-list">${rows||empty('No internal team members yet.')}</div>`;}
     const workspaceName=s.workspaces.find(w=>w.id===s.ws)?.name||'Workspace';
     const rows=people.map(m=>{const name=m.profiles?.full_name||m.profiles?.email||'Account';const searchable=[name,m.profiles?.email,m.profiles?.phone,m.job_title,m.role].filter(Boolean).join(' ').toLowerCase();return `<article class="panel user-row" data-user-row data-search="${esc(searchable)}" data-role="${esc(m.role||'')}" data-status="${esc(m.status||'')}">${avatar(name)}<span class="online-dot ${m.status==='active'?'online':'offline'}"></span><div class="user-meta"><b>${esc(name)}</b>${badge(m.job_title||label(m.role))}${m.available_for_scheduling?badge('Available','green'):''}</div><div class="user-contact"><span>${icon('mail',11)} ${esc(m.profiles?.email||'No email')}</span>${m.profiles?.phone?`<span>${icon('phone',11)} ${esc(m.profiles.phone)}</span>`:''}<span>${icon('building',11)} ${esc(workspaceName)}</span></div><button class="small-btn" data-route="user-management/${esc(m.user_id)}">Open Profile ${icon('chevron',10)}</button></article>`;}).join('');
@@ -87,7 +87,7 @@
   }
 
   async function userManagement(id){
-    const [people,sv]=await Promise.all([call('profile','members'),call('profile','services')]);s.cache.people=people;
+    const [people,sv]=await Promise.all([call('profile','workspace_members'),call('profile','services')]);s.cache.people=people;
     if(!id){const rows=people.map(m=>{const name=m.profiles?.full_name||m.profiles?.email||'Account';return `<article class="panel manage-row">${avatar(name)}<div><b>${esc(name)}</b><div class="tiny">${esc(m.profiles?.email||'')}</div></div>${badge(m.available_for_scheduling?'Available':'Unavailable',m.available_for_scheduling?'green':'')}<button class="manage-options" data-route="user-management/${esc(m.user_id)}">Open Profile ${icon('chevron',9)}</button><div class="manage-options">Available for matching ${m.available_for_scheduling?'☑':'☐'}</div></article>`;}).join('');return `${head('User Management','Manage user visibility, access, and project permissions.',`<div class="segmented"><span class="active">Service Provider</span><span>Referral</span><span>Internal</span></div>`)}<div class="manage-list">${rows||empty('No workspace members yet.')}</div>`;}
     const member=people.find(m=>m.user_id===id);if(!member)return empty('This user is not part of the active workspace.');
     const name=member.profiles?.full_name||member.profiles?.email||'Account';const enabled=sv.services.filter(x=>sv.selected.some(v=>v.service_id===x.id));
